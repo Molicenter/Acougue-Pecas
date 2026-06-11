@@ -169,6 +169,10 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         margin-top: 0 !important;
     }
     header, [data-testid="stSidebar"], [data-testid="stHeader"] { display: none !important; }
+    
+    /* Esconde os painéis de tela e mantém só o relatório branco */
+    .hide-print { display: none !important; }
+    
     [data-testid="stElementContainer"]:has([data-testid="stDataEditor"]),
     [data-testid="stElementContainer"]:has(.topbar-loja),
     [data-testid="stElementContainer"]:has([data-testid="stMetric"]),
@@ -176,6 +180,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
     [data-testid="stHorizontalBlock"],
     div[data-testid="stVerticalBlockBorderWrapper"],
     hr, .stAlert, .stInfo { display: none !important; }
+    
     #print-section {
         display: block !important;
         width: 100% !important;
@@ -471,7 +476,7 @@ def modal_zerar_pedidos():
 # ─────────────────────────────────────────────
 if perfil_navegacao == "Separação e Fechamento":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">📊</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Açougue Peças</div>
@@ -566,7 +571,7 @@ elif perfil_navegacao == "Visão das Lojas":
     with col_info:
         id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
         st.markdown(f"""
-        <div class="topbar-loja">
+        <div class="topbar-loja hide-print">
             <div class="topbar-left">
                 <span style="font-size:22px">🥩</span>
                 <div>
@@ -674,7 +679,7 @@ elif perfil_navegacao == "Visão das Lojas":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Visão por Tipo (Resumo)":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🥩</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Tipo — Açougue Peças</div>
@@ -698,20 +703,16 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
     for i in range(0, len(nomes_tipos), 1):
         cols = st.columns(1, gap="small")
         for j, tipo_prod in enumerate(nomes_tipos[i:i+1]):
-            
-            df_cat_tipo = df_cat[df_cat["Tipo"] == tipo_prod]
-            lojas_tipo = [l for l in LOJAS if df_cat_tipo[l].any()]
-            
-            if not lojas_tipo:
-                continue 
 
-            lojas_renomeadas = {l: MAPA_LOJAS[l] for l in lojas_tipo}
-
+            # Carrega a base geral para o Tipo atual
             df_forn = df_all[df_all["Tipo"] == tipo_prod].copy()
             
-            colunas_presentes = [c for c in lojas_tipo if c in df_forn.columns]
+            # Aqui forçamos para mostrar SEMPRE todas as Lojas, garantindo que apareça 0 se não preenchido
+            colunas_presentes = LOJAS
             df_forn = df_forn[["Descrição"] + colunas_presentes].copy()
             df_forn["TOTAL"] = df_forn[colunas_presentes].sum(axis=1)
+            
+            lojas_renomeadas = {l: MAPA_LOJAS[l] for l in colunas_presentes}
             df_forn = df_forn.rename(columns=lojas_renomeadas)
 
             lojas_cols_renomeadas = [MAPA_LOJAS[l] for l in colunas_presentes]
@@ -736,9 +737,6 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                     )
                     st.markdown('</div>', unsafe_allow_html=True)
 
-                    lojas_str = " · ".join([MAPA_LOJAS[l] for l in colunas_presentes])
-                    st.caption(f"Lojas com acesso: {lojas_str}")
-
                     cols_order_forn = ["Descrição"] + lojas_cols_renomeadas + ["TOTAL"]
                     df_forn_edit = st.data_editor(
                         df_forn[cols_order_forn],
@@ -762,7 +760,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                     html_print_content += f"""
                     <h3 style="color: black; margin-top: 15px; margin-bottom: 5px;">🥩 {tipo_prod}</h3>
                     {html_table}
-                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px;">
+                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px; color: black;">
                         Total da Categoria: {total_geral} unidades
                     </div>
                     """
@@ -793,7 +791,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Catálogo de Produtos":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Peças</div>
