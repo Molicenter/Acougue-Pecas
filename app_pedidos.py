@@ -24,7 +24,7 @@ if 'usuario_logado_acpecas' not in st.session_state:
     st.session_state['usuario_logado_acpecas'] = None
 
 # ─────────────────────────────────────────────
-# CSS GLOBAL E DE IMPRESSÃO À PROVA DE BALAS
+# CSS GLOBAL E DE IMPRESSÃO (PALETA VERMELHA)
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -139,6 +139,20 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
 }
 [data-testid="stMetricValue"] { color: var(--red-bright) !important; font-weight: 700; font-size: 1.8rem !important; }
 [data-testid="stMetricLabel"] { color: var(--text-muted) !important; }
+
+.topbar-loja {
+    background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%);
+    border: 1px solid var(--red-mid);
+    border-radius: 10px;
+    padding: 10px 18px;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.topbar-left { display: flex; align-items: center; gap: 12px; }
+.topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
+.topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
 /* REGRAS DE IMPRESSÃO ABSOLUTAS */
 @media print {
@@ -465,7 +479,7 @@ def modal_zerar_pedidos():
 # ─────────────────────────────────────────────
 if perfil_navegacao == "Separação e Fechamento":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">📊</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Açougue Peças</div>
@@ -504,16 +518,14 @@ if perfil_navegacao == "Separação e Fechamento":
         )
 
         html_table = df_editado.to_html(index=False, classes="print-table")
-        st.markdown(f"""
-        <div id="print-section">
-            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-                Resumo de Separação — Açougue Peças
-            </h2>
-            <div class="print-container">
-                {html_table}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"""<div id="print-section">
+<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+    Resumo de Separação — Açougue Peças
+</h2>
+<div class="print-container">
+{html_table}
+</div>
+</div>""", unsafe_allow_html=True)
 
         st.divider()
         col_salvar, col_csv, col_excel, col_print, col_zerar = st.columns([2.5, 1.2, 1.2, 1.5, 2.5])
@@ -560,7 +572,7 @@ elif perfil_navegacao == "Visão das Lojas":
     with col_info:
         id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
         st.markdown(f"""
-        <div class="topbar-loja">
+        <div class="topbar-loja hide-print">
             <div class="topbar-left">
                 <span style="font-size:22px">🥩</span>
                 <div>
@@ -614,16 +626,14 @@ elif perfil_navegacao == "Visão das Lojas":
 
         # ── HTML INVISÍVEL PARA IMPRESSÃO DA LOJA ─────────────────────
         html_table_loja = df_editado.to_html(index=False, classes="print-table")
-        st.markdown(f"""
-        <div id="print-section">
-            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-                Resumo do Pedido — {loja_selecionada}
-            </h2>
-            <div class="print-container">
-                {html_table_loja}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f"""<div id="print-section">
+<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+    Resumo do Pedido — {loja_selecionada}
+</h2>
+<div class="print-container">
+{html_table_loja}
+</div>
+</div>""", unsafe_allow_html=True)
         # ──────────────────────────────────────────────────────────────
 
         itens_com_pedido = int((df_editado["Qtde"] > 0).sum())
@@ -668,7 +678,7 @@ elif perfil_navegacao == "Visão das Lojas":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Visão por Tipo (Resumo)":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🥩</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Tipo — Açougue Peças</div>
@@ -744,29 +754,23 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                         </div>
                     """, unsafe_allow_html=True)
                     
-                    # Acumulando HTML para a página de impressão
+                    # Acumulando HTML para a página de impressão SEM ESPAÇOS INICIAIS
                     html_table = df_forn_edit.to_html(index=False, classes="print-table")
-                    html_print_content += f"""
-                    <h3 style="color: black; margin-top: 15px; margin-bottom: 5px;">🥩 {tipo_prod}</h3>
-                    {html_table}
-                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px; color: black;">
-                        Total da Categoria: {total_geral} unidades
-                    </div>
-                    """
+                    html_print_content += f"<h3 style='color: black; margin-top: 15px; margin-bottom: 5px;'>🥩 {tipo_prod}</h3>\n"
+                    html_print_content += f"{html_table}\n"
+                    html_print_content += f"<div style='text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px; color: black;'>Total da Categoria: {total_geral} unidades</div>\n"
 
         st.write("<br>", unsafe_allow_html=True)
 
     # ── HTML INVISÍVEL PARA IMPRESSÃO DO RESUMO ───────────────────
-    st.markdown(f"""
-    <div id="print-section">
-        <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
-            Visão por Tipo (Resumo) — Açougue Peças
-        </h2>
-        <div class="print-container">
-            {html_print_content}
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(f"""<div id="print-section">
+<h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+    Visão por Tipo (Resumo) — Açougue Peças
+</h2>
+<div class="print-container">
+{html_print_content}
+</div>
+</div>""", unsafe_allow_html=True)
     # ──────────────────────────────────────────────────────────────
     
     st.divider()
@@ -780,7 +784,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Catálogo de Produtos":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Peças</div>
