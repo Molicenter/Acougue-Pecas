@@ -154,7 +154,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
 .topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
 .topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-/* REGRAS DE IMPRESSÃO */
+/* REGRAS DE IMPRESSÃO - FORÇANDO A TELA BRANCA E AS TABELAS */
 @media print {
     @page { margin: 5mm 10mm; }
     .stApp, .main, body, html {
@@ -169,13 +169,18 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         margin-top: 0 !important;
     }
     header, [data-testid="stSidebar"], [data-testid="stHeader"] { display: none !important; }
+    
+    /* ESCONDE TUDO DA TELA NORMAL */
     [data-testid="stElementContainer"]:has([data-testid="stDataEditor"]),
     [data-testid="stElementContainer"]:has(.topbar-loja),
     [data-testid="stElementContainer"]:has([data-testid="stMetric"]),
     [data-testid="stElementContainer"]:has(button),
     [data-testid="stHorizontalBlock"],
+    .page-header, /* Esconde o banner vermelho */
     div[data-testid="stVerticalBlockBorderWrapper"],
     hr, .stAlert, .stInfo { display: none !important; }
+    
+    /* MOSTRA APENAS A SEÇÃO DE IMPRESSÃO */
     #print-section {
         display: block !important;
         width: 100% !important;
@@ -188,13 +193,14 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         padding-bottom: 4px !important;
         border-bottom: 1px solid #000 !important;
         color: #000 !important;
+        display: block !important;
     }
     #print-section h3 {
         font-size: 13px !important;
         border-bottom: none !important;
         margin-top: 15px !important;
     }
-    .print-container { width: 100%; }
+    .print-container { width: 100%; display: block !important;}
     table.print-table {
         width: 100%;
         border-collapse: collapse;
@@ -202,6 +208,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         color: #000000 !important;
         font-family: 'IBM Plex Sans', sans-serif;
         line-height: 1.05 !important;
+        display: table !important;
     }
     table.print-table th, table.print-table td {
         border: 1px solid #000000 !important;
@@ -471,7 +478,7 @@ def modal_zerar_pedidos():
 # ─────────────────────────────────────────────
 if perfil_navegacao == "Separação e Fechamento":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">📊</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Açougue Peças</div>
@@ -674,7 +681,7 @@ elif perfil_navegacao == "Visão das Lojas":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Visão por Tipo (Resumo)":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🥩</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Tipo — Açougue Peças</div>
@@ -698,20 +705,16 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
     for i in range(0, len(nomes_tipos), 1):
         cols = st.columns(1, gap="small")
         for j, tipo_prod in enumerate(nomes_tipos[i:i+1]):
-            
-            df_cat_tipo = df_cat[df_cat["Tipo"] == tipo_prod]
-            lojas_tipo = [l for l in LOJAS if df_cat_tipo[l].any()]
-            
-            if not lojas_tipo:
-                continue 
 
-            lojas_renomeadas = {l: MAPA_LOJAS[l] for l in lojas_tipo}
-
+            # Carrega a base geral para o Tipo atual
             df_forn = df_all[df_all["Tipo"] == tipo_prod].copy()
             
-            colunas_presentes = [c for c in lojas_tipo if c in df_forn.columns]
+            # Força para mostrar TODAS as Lojas (sempre aparece 0 se não preenchido)
+            colunas_presentes = LOJAS
             df_forn = df_forn[["Descrição"] + colunas_presentes].copy()
             df_forn["TOTAL"] = df_forn[colunas_presentes].sum(axis=1)
+            
+            lojas_renomeadas = {l: MAPA_LOJAS[l] for l in colunas_presentes}
             df_forn = df_forn.rename(columns=lojas_renomeadas)
 
             lojas_cols_renomeadas = [MAPA_LOJAS[l] for l in colunas_presentes]
@@ -736,9 +739,6 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                     )
                     st.markdown('</div>', unsafe_allow_html=True)
 
-                    lojas_str = " · ".join([MAPA_LOJAS[l] for l in colunas_presentes])
-                    st.caption(f"Lojas com acesso: {lojas_str}")
-
                     cols_order_forn = ["Descrição"] + lojas_cols_renomeadas + ["TOTAL"]
                     df_forn_edit = st.data_editor(
                         df_forn[cols_order_forn],
@@ -762,7 +762,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                     html_print_content += f"""
                     <h3 style="color: black; margin-top: 15px; margin-bottom: 5px;">🥩 {tipo_prod}</h3>
                     {html_table}
-                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px;">
+                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px; color: black;">
                         Total da Categoria: {total_geral} unidades
                     </div>
                     """
@@ -793,7 +793,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Catálogo de Produtos":
     st.markdown("""
-    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Peças</div>
