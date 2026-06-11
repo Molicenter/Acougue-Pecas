@@ -154,9 +154,9 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
 .topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
 .topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-/* REGRAS DE IMPRESSÃO ABSOLUTAS */
+/* REGRAS DE IMPRESSÃO ABSOLUTAS - COMPACTADAS PARA CABER EM 1 PÁGINA */
 @media print {
-    @page { margin: 5mm 10mm; }
+    @page { margin: 4mm 8mm; }
     .stApp, .main, body, html {
         background-color: #ffffff !important;
         background-image: none !important;
@@ -187,33 +187,34 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         width: 100% !important;
     }
     #print-section h2 {
-        font-size: 15px !important;
-        margin: 0 0 8px 0 !important;
-        padding-bottom: 4px !important;
+        font-size: 14px !important;
+        margin: 0 0 5px 0 !important;
+        padding-bottom: 3px !important;
         border-bottom: 1px solid #000 !important;
         color: #000 !important;
         display: block !important;
     }
     #print-section h3 {
-        font-size: 13px !important;
+        font-size: 12px !important;
         border-bottom: none !important;
-        margin-top: 15px !important;
+        margin-top: 10px !important;
+        margin-bottom: 3px !important;
         color: #000 !important;
     }
     .print-container { width: 100%; display: block !important;}
     table.print-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 10px !important;
+        font-size: 9.5px !important; /* Fonte ligeiramente menor */
         color: #000000 !important;
         font-family: 'IBM Plex Sans', sans-serif;
         line-height: 1.05 !important;
         display: table !important;
-        margin-bottom: 5px !important;
+        margin-bottom: 3px !important; /* Menos margem entre tabelas */
     }
     table.print-table th, table.print-table td {
         border: 1px solid #000000 !important;
-        padding: 2px 4px !important;
+        padding: 1px 3px !important; /* Espaçamento interno mais espremido */
         text-align: left;
         color: #000000 !important;
         background-color: #ffffff !important;
@@ -756,9 +757,9 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                     
                     # Acumulando HTML para a página de impressão SEM ESPAÇOS INICIAIS
                     html_table = df_forn_edit.to_html(index=False, classes="print-table")
-                    html_print_content += f"<h3 style='color: black; margin-top: 15px; margin-bottom: 5px;'>🥩 {tipo_prod}</h3>\n"
+                    html_print_content += f"<h3 style='color: black; margin-top: 10px; margin-bottom: 4px;'>🥩 {tipo_prod}</h3>\n"
                     html_print_content += f"{html_table}\n"
-                    html_print_content += f"<div style='text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px; color: black;'>Total da Categoria: {total_geral} unidades</div>\n"
+                    html_print_content += f"<div style='text-align:right; font-weight:bold; font-size:11px; margin-top:3px; margin-bottom: 8px; color: black;'>Total da Categoria: {total_geral} unidades</div>\n"
 
         st.write("<br>", unsafe_allow_html=True)
 
