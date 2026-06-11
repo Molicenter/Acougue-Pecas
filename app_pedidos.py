@@ -478,7 +478,7 @@ def modal_zerar_pedidos():
 # ─────────────────────────────────────────────
 if perfil_navegacao == "Separação e Fechamento":
     st.markdown("""
-    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">📊</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Açougue Peças</div>
@@ -573,7 +573,7 @@ elif perfil_navegacao == "Visão das Lojas":
     with col_info:
         id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
         st.markdown(f"""
-        <div class="topbar-loja">
+        <div class="topbar-loja hide-print">
             <div class="topbar-left">
                 <span style="font-size:22px">🥩</span>
                 <div>
@@ -681,7 +681,7 @@ elif perfil_navegacao == "Visão das Lojas":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Visão por Tipo (Resumo)":
     st.markdown("""
-    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🥩</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Tipo — Açougue Peças</div>
@@ -709,7 +709,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
             # Carrega a base geral para o Tipo atual
             df_forn = df_all[df_all["Tipo"] == tipo_prod].copy()
             
-            # Força para mostrar TODAS as Lojas (sempre aparece 0 se não preenchido)
+            # Aqui forçamos para mostrar SEMPRE todas as Lojas, garantindo que apareça 0 se não preenchido
             colunas_presentes = LOJAS
             df_forn = df_forn[["Descrição"] + colunas_presentes].copy()
             df_forn["TOTAL"] = df_forn[colunas_presentes].sum(axis=1)
@@ -793,7 +793,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Catálogo de Produtos":
     st.markdown("""
-    <div class="page-header" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Peças</div>
