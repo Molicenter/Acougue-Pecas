@@ -24,7 +24,7 @@ if 'usuario_logado_acpecas' not in st.session_state:
     st.session_state['usuario_logado_acpecas'] = None
 
 # ─────────────────────────────────────────────
-# CSS GLOBAL E DE IMPRESSÃO (PALETA VERMELHA)
+# CSS GLOBAL E DE IMPRESSÃO À PROVA DE BALAS
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -140,54 +140,39 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
 [data-testid="stMetricValue"] { color: var(--red-bright) !important; font-weight: 700; font-size: 1.8rem !important; }
 [data-testid="stMetricLabel"] { color: var(--text-muted) !important; }
 
-.topbar-loja {
-    background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%);
-    border: 1px solid var(--red-mid);
-    border-radius: 10px;
-    padding: 10px 18px;
-    margin-bottom: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-.topbar-left { display: flex; align-items: center; gap: 12px; }
-.topbar-title { font-size: 18px; font-weight: 700; color: var(--text-header); }
-.topbar-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-
-/* REGRAS DE IMPRESSÃO - FORÇANDO A TELA BRANCA E AS TABELAS */
+/* REGRAS DE IMPRESSÃO ABSOLUTAS */
 @media print {
     @page { margin: 5mm 10mm; }
     .stApp, .main, body, html {
         background-color: #ffffff !important;
-        color: #000000 !important;
         background-image: none !important;
+        color: #000000 !important;
         padding: 0 !important;
         margin: 0 !important;
     }
-    .main .block-container, [data-testid="stAppViewBlockContainer"] {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
+    header, [data-testid="stSidebar"], [data-testid="stHeader"] { 
+        display: none !important; 
     }
-    header, [data-testid="stSidebar"], [data-testid="stHeader"] { display: none !important; }
     
-    /* ESCONDE TUDO DA TELA NORMAL */
-    [data-testid="stElementContainer"]:has([data-testid="stDataEditor"]),
-    [data-testid="stElementContainer"]:has(.topbar-loja),
-    [data-testid="stElementContainer"]:has([data-testid="stMetric"]),
-    [data-testid="stElementContainer"]:has(button),
+    /* DESLIGA TUDO O QUE FOR DO STREAMLIT NA TELA */
+    [data-testid="stElementContainer"],
     [data-testid="stHorizontalBlock"],
-    .page-header, /* Esconde o banner vermelho */
-    div[data-testid="stVerticalBlockBorderWrapper"],
-    hr, .stAlert, .stInfo { display: none !important; }
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        display: none !important;
+    }
     
-    /* MOSTRA APENAS A SEÇÃO DE IMPRESSÃO */
+    /* RELIGA APENAS A CAIXA QUE CONTÉM O PRINT-SECTION */
+    [data-testid="stElementContainer"]:has(#print-section) {
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    /* FORMATAÇÃO DO PAPEL */
     #print-section {
         display: block !important;
         width: 100% !important;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
     }
-    #print-section h2, #print-section h3 {
+    #print-section h2 {
         font-size: 15px !important;
         margin: 0 0 8px 0 !important;
         padding-bottom: 4px !important;
@@ -199,6 +184,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         font-size: 13px !important;
         border-bottom: none !important;
         margin-top: 15px !important;
+        color: #000 !important;
     }
     .print-container { width: 100%; display: block !important;}
     table.print-table {
@@ -209,6 +195,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         font-family: 'IBM Plex Sans', sans-serif;
         line-height: 1.05 !important;
         display: table !important;
+        margin-bottom: 5px !important;
     }
     table.print-table th, table.print-table td {
         border: 1px solid #000000 !important;
@@ -478,7 +465,7 @@ def modal_zerar_pedidos():
 # ─────────────────────────────────────────────
 if perfil_navegacao == "Separação e Fechamento":
     st.markdown("""
-    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">📊</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Separação e Fechamento — Açougue Peças</div>
@@ -573,7 +560,7 @@ elif perfil_navegacao == "Visão das Lojas":
     with col_info:
         id_loja = MAPA_LOJAS.get(loja_selecionada, loja_selecionada)
         st.markdown(f"""
-        <div class="topbar-loja hide-print">
+        <div class="topbar-loja">
             <div class="topbar-left">
                 <span style="font-size:22px">🥩</span>
                 <div>
@@ -681,7 +668,7 @@ elif perfil_navegacao == "Visão das Lojas":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Visão por Tipo (Resumo)":
     st.markdown("""
-    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🥩</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Visão por Tipo — Açougue Peças</div>
@@ -709,7 +696,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
             # Carrega a base geral para o Tipo atual
             df_forn = df_all[df_all["Tipo"] == tipo_prod].copy()
             
-            # Aqui forçamos para mostrar SEMPRE todas as Lojas, garantindo que apareça 0 se não preenchido
+            # Forçamos mostrar sempre as colunas
             colunas_presentes = LOJAS
             df_forn = df_forn[["Descrição"] + colunas_presentes].copy()
             df_forn["TOTAL"] = df_forn[colunas_presentes].sum(axis=1)
@@ -793,7 +780,7 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
 # ─────────────────────────────────────────────
 elif perfil_navegacao == "Catálogo de Produtos":
     st.markdown("""
-    <div class="page-header hide-print" style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
+    <div style="background: linear-gradient(90deg, var(--red-dark) 0%, #1a0808 100%); padding: 14px 20px; border-radius: 10px; margin-bottom: 22px;">
         <span style="font-size: 26px; margin-right: 12px;">🗂️</span>
         <div style="display: inline-block; vertical-align: top;">
             <div style="font-size: 20px; font-weight: 700; color: var(--text-header);">Catálogo de Peças</div>
