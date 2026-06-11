@@ -182,12 +182,17 @@ div[data-testid="stVerticalBlockBorderWrapper"]:hover {
         margin-top: 0 !important;
         padding-top: 0 !important;
     }
-    #print-section h2 {
+    #print-section h2, #print-section h3 {
         font-size: 15px !important;
         margin: 0 0 8px 0 !important;
         padding-bottom: 4px !important;
         border-bottom: 1px solid #000 !important;
         color: #000 !important;
+    }
+    #print-section h3 {
+        font-size: 13px !important;
+        border-bottom: none !important;
+        margin-top: 15px !important;
     }
     .print-container { width: 100%; }
     table.print-table {
@@ -504,7 +509,6 @@ if perfil_navegacao == "Separação e Fechamento":
             key=f"sep_editor_{st.session_state['reset_counter_acpecas']}"
         )
 
-        # ── HTML INVISÍVEL PARA IMPRESSÃO ─────────────────────────────
         html_table = df_editado.to_html(index=False, classes="print-table")
         st.markdown(f"""
         <div id="print-section">
@@ -516,7 +520,6 @@ if perfil_navegacao == "Separação e Fechamento":
             </div>
         </div>
         """, unsafe_allow_html=True)
-        # ──────────────────────────────────────────────────────────────
 
         st.divider()
         col_salvar, col_csv, col_excel, col_print, col_zerar = st.columns([2.5, 1.2, 1.2, 1.5, 2.5])
@@ -615,16 +618,36 @@ elif perfil_navegacao == "Visão das Lojas":
                 key=f"loja_acpecas_{st.session_state['reset_counter_acpecas']}"
             )
 
+        # ── HTML INVISÍVEL PARA IMPRESSÃO DA LOJA ─────────────────────
+        html_table_loja = df_editado.to_html(index=False, classes="print-table")
+        st.markdown(f"""
+        <div id="print-section">
+            <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+                Resumo do Pedido — {loja_selecionada}
+            </h2>
+            <div class="print-container">
+                {html_table_loja}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        # ──────────────────────────────────────────────────────────────
+
         itens_com_pedido = int((df_editado["Qtde"] > 0).sum())
         total_itens      = len(df_editado)
         total_unidades   = int(df_editado["Qtde"].sum())
         pct              = round(itens_com_pedido / total_itens * 100) if total_itens else 0
 
         st.divider()
-        m1, m2, m3, _, col_btn = st.columns([2.5, 2.2, 1.8, 0.5, 3])
+        m1, m2, m3, col_print, col_btn = st.columns([2.5, 2.2, 1.8, 1.5, 3])
         with m1: st.metric("Itens preenchidos", f"{itens_com_pedido} / {total_itens}")
         with m2: st.metric("Total de unidades", total_unidades)
         with m3: st.metric("Cobertura", f"{pct}%")
+        
+        with col_print:
+            st.write("<br>", unsafe_allow_html=True)
+            if st.button("🖨️ Imprimir", use_container_width=True):
+                components.html("<script>window.parent.print();</script>", height=0)
+
         with col_btn:
             st.write("<br>", unsafe_allow_html=True)
             if st.button("💾 Salvar Pedido da Semana", type="primary", use_container_width=True):
@@ -668,6 +691,9 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
         st.stop()
 
     nomes_tipos = df_cat["Tipo"].dropna().unique().tolist()
+    
+    # Variável para acumular o HTML de todas as tabelas para impressão
+    html_print_content = ""
 
     for i in range(0, len(nomes_tipos), 1):
         cols = st.columns(1, gap="small")
@@ -730,8 +756,37 @@ elif perfil_navegacao == "Visão por Tipo (Resumo)":
                             Total Geral: {total_geral} unidades
                         </div>
                     """, unsafe_allow_html=True)
+                    
+                    # Acumulando HTML para a página de impressão
+                    html_table = df_forn_edit.to_html(index=False, classes="print-table")
+                    html_print_content += f"""
+                    <h3 style="color: black; margin-top: 15px; margin-bottom: 5px;">🥩 {tipo_prod}</h3>
+                    {html_table}
+                    <div style="text-align:right; font-weight:bold; font-size:12px; margin-top:5px; margin-bottom: 15px;">
+                        Total da Categoria: {total_geral} unidades
+                    </div>
+                    """
 
         st.write("<br>", unsafe_allow_html=True)
+
+    # ── HTML INVISÍVEL PARA IMPRESSÃO DO RESUMO ───────────────────
+    st.markdown(f"""
+    <div id="print-section">
+        <h2 style="color: black; margin-bottom: 10px; text-align: center; border-bottom: 2px solid black; padding-bottom: 5px;">
+            Visão por Tipo (Resumo) — Açougue Peças
+        </h2>
+        <div class="print-container">
+            {html_print_content}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    # ──────────────────────────────────────────────────────────────
+    
+    st.divider()
+    _, col_print = st.columns([8, 2])
+    with col_print:
+        if st.button("🖨️ Imprimir Resumo Geral", use_container_width=True):
+            components.html("<script>window.parent.print();</script>", height=0)
 
 # ─────────────────────────────────────────────
 # ROTA 4 — CATÁLOGO DE PRODUTOS
