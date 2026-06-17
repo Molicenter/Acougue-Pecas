@@ -244,18 +244,18 @@ LOJAS = ["Loja 01", "Loja 02", "Loja 03", "Loja 04", "Loja 05", "Loja 06", "Loja
 MAPA_LOJAS = {l: l for l in LOJAS}
 
 produtos_iniciais = [
-    {"Tipo": "Bovino", "Descrição": "Boi Casado"},
-    {"Tipo": "Bovino", "Descrição": "Boi Dianteiro"},
-    {"Tipo": "Bovino", "Descrição": "Boi Capote"},
-    {"Tipo": "Bovino", "Descrição": "Boi Bola"},
-    {"Tipo": "Bovino", "Descrição": "Boi Bisteca Inteira"},
-    {"Tipo": "Bovino", "Descrição": "Boi Costela Inteira"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Casada"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Dianteiro"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Capote"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Bola"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Bisteca Inteira"},
-    {"Tipo": "Bovino", "Descrição": "Novilha Costela Inteira"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Casado"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Dianteiro"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Capote"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Bola"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Bisteca Inteira"},
+    {"Tipo": "Bovinos", "Descrição": "Boi Costela Inteira"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Casada"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Dianteiro"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Capote"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Bola"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Bisteca Inteira"},
+    {"Tipo": "Bovinos", "Descrição": "Novilha Costela Inteira"},
     
     {"Tipo": "Miúdos", "Descrição": "Bucho Kg"},
     {"Tipo": "Miúdos", "Descrição": "Coração Kg"},
@@ -904,7 +904,7 @@ elif perfil_navegacao == "Catálogo de Produtos":
     with st.container(border=True):
         
         col_cfg_cat = {
-            "Tipo":       st.column_config.SelectboxColumn("Tipo (Categoria)", options=["Bovino", "Miúdos", "Porcos", "Etiquetas"], width=150, required=True),
+            "Tipo":       st.column_config.SelectboxColumn("Tipo (Categoria)", options=["Bovinos", "Miúdos", "Porcos", "Etiquetas"], width=150, required=True),
             "Descrição":  st.column_config.TextColumn("Descrição do Item", width=350, required=True),
         }
         for loja in LOJAS:
