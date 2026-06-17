@@ -1,8 +1,12 @@
 import streamlit as st
 import pandas as pd
 import io
+import datetime
 import streamlit.components.v1 as components
 from streamlit_gsheets import GSheetsConnection
+from openpyxl import Workbook
+from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
+from openpyxl.utils import get_column_letter
 
 # ─────────────────────────────────────────────
 # CONFIGURAÇÃO DA PÁGINA
@@ -545,12 +549,105 @@ if perfil_navegacao == "Separação e Fechamento":
 
         with col_excel:
             buffer = io.BytesIO()
-            with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-                df_exp = df_editado.copy().rename(columns=MAPA_LOJAS)
-                df_exp.to_excel(writer, index=False, sheet_name='Pedidos AcPecas')
-            st.download_button("⬇️ Excel", data=buffer.getvalue(), file_name="separacao_acpecas.xlsx",
-                               mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                               use_container_width=True)
+            
+            # Prepara os dados
+            df_exp = df_editado.copy().rename(columns=MAPA_LOJAS)
+            
+            # Cria o workbook e a planilha ativa
+            wb = Workbook()
+            ws = wb.active
+            ws.title = "Pedidos AcPecas"
+            
+            # 🎨 ESTILOS DE FORMATAÇÃO
+            fill_title = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid") # Amarelo do topo
+            fill_header = PatternFill(start_color="7B1315", end_color="7B1315", fill_type="solid") # Vermelho da imagem 2
+            fill_sep = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid") # Cinza claro para os grupos
+            
+            font_title = Font(bold=True, size=12)
+            font_header = Font(bold=True, color="FFFFFF")
+            font_sep = Font(bold=True)
+            
+            align_center = Alignment(horizontal="center", vertical="center")
+            align_left = Alignment(horizontal="left", vertical="center")
+            
+            # Bordas finas para todas as células (mantendo o aspecto de tabela da imagem 2)
+            thin_border = Border(
+                left=Side(style='thin'), right=Side(style='thin'),
+                top=Side(style='thin'), bottom=Side(style='thin')
+            )
+            
+            colunas = list(df_exp.columns)
+            max_col = len(colunas)
+            
+            # 1. LINHA DE TÍTULO SUPERIOR (DATA DO PROCESSO)
+            hoje = datetime.datetime.now().strftime("%d/%m/%Y")
+            ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_col)
+            cell_title = ws.cell(row=1, column=1, value=f"Pedidos do dia {hoje}")
+            cell_title.fill = fill_title
+            cell_title.font = font_title
+            cell_title.alignment = align_center
+            cell_title.border = thin_border
+            
+            # Aplica a borda no restante das células mescladas para o layout não quebrar
+            for c in range(1, max_col + 1):
+                ws.cell(row=1, column=c).border = thin_border
+            
+            # 2. CABEÇALHO VERMELHO
+            for col_num, col_name in enumerate(colunas, 1):
+                cell = ws.cell(row=2, column=col_num, value=col_name)
+                cell.fill = fill_header
+                cell.font = font_header
+                cell.alignment = align_center
+                cell.border = thin_border
+                
+            # 3. INSERINDO DADOS E SEPARADORES POR TIPO
+            row_idx = 3
+            tipos = df_exp['Tipo'].unique()
+            
+            for tipo in tipos:
+                # Linha separadora do Tipo (ex: "Pedidos bovinos")
+                ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=max_col)
+                cell_sep = ws.cell(row=row_idx, column=1, value=f"Pedidos {tipo.lower()}")
+                cell_sep.fill = fill_sep
+                cell_sep.font = font_sep
+                cell_sep.alignment = align_center
+                
+                # Bordas na linha do separador
+                for c in range(1, max_col + 1):
+                    ws.cell(row=row_idx, column=c).border = thin_border
+                    
+                row_idx += 1
+                
+                # Inserindo os itens que pertencem a esse tipo
+                df_tipo = df_exp[df_exp['Tipo'] == tipo]
+                for _, row_data in df_tipo.iterrows():
+                    for col_num, col_name in enumerate(colunas, 1):
+                        val = row_data[col_name]
+                        cell = ws.cell(row=row_idx, column=col_num, value=val)
+                        cell.border = thin_border # Garante as linhas em todas as células
+                        
+                        if col_name in ['Tipo', 'Descrição']:
+                            cell.alignment = align_left
+                        else:
+                            cell.alignment = align_center
+                    row_idx += 1
+                    
+            # 4. AJUSTE DE LARGURA DAS COLUNAS
+            ws.column_dimensions['A'].width = 15 # Tipo
+            ws.column_dimensions['B'].width = 40 # Descrição
+            for i in range(3, max_col + 1):
+                col_letter = get_column_letter(i)
+                ws.column_dimensions[col_letter].width = 12
+                
+            wb.save(buffer)
+            
+            st.download_button(
+                label="⬇️ Excel",
+                data=buffer.getvalue(),
+                file_name="separacao_acpecas.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True
+            )
                                
         with col_print:
             if st.button("🖨️ Imprimir", use_container_width=True):
