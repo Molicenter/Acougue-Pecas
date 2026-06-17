@@ -559,18 +559,19 @@ if perfil_navegacao == "Separação e Fechamento":
             ws.title = "Pedidos AcPecas"
             
             # 🎨 ESTILOS DE FORMATAÇÃO
-            fill_title = PatternFill(start_color="FFFF00", end_color="FFFF00", fill_type="solid") # Amarelo do topo
-            fill_header = PatternFill(start_color="7B1315", end_color="7B1315", fill_type="solid") # Vermelho da imagem 2
-            fill_sep = PatternFill(start_color="D9D9D9", end_color="D9D9D9", fill_type="solid") # Cinza claro para os grupos
+            # Usando o mesmo vermelho escuro para todos os fundos de cabeçalho
+            fill_dark_red = PatternFill(start_color="7B1315", end_color="7B1315", fill_type="solid") 
+            # Vermelho bem claro para separar as linhas (zebra)
+            fill_light_red = PatternFill(start_color="FADBD8", end_color="FADBD8", fill_type="solid") 
             
-            font_title = Font(bold=True, size=12)
+            # Fonte sempre branca e negrito para destacar no fundo vermelho escuro
+            font_white_bold = Font(bold=True, color="FFFFFF", size=12)
             font_header = Font(bold=True, color="FFFFFF")
-            font_sep = Font(bold=True)
             
             align_center = Alignment(horizontal="center", vertical="center")
             align_left = Alignment(horizontal="left", vertical="center")
             
-            # Bordas finas para todas as células (mantendo o aspecto de tabela da imagem 2)
+            # Bordas finas para todas as células
             thin_border = Border(
                 left=Side(style='thin'), right=Side(style='thin'),
                 top=Side(style='thin'), bottom=Side(style='thin')
@@ -579,52 +580,62 @@ if perfil_navegacao == "Separação e Fechamento":
             colunas = list(df_exp.columns)
             max_col = len(colunas)
             
-            # 1. LINHA DE TÍTULO SUPERIOR (DATA DO PROCESSO)
+            # 1. LINHA DE TÍTULO SUPERIOR (DATA DO PROCESSO) EM VERMELHO
             hoje = datetime.datetime.now().strftime("%d/%m/%Y")
             ws.merge_cells(start_row=1, start_column=1, end_row=1, end_column=max_col)
             cell_title = ws.cell(row=1, column=1, value=f"Pedidos do dia {hoje}")
-            cell_title.fill = fill_title
-            cell_title.font = font_title
+            cell_title.fill = fill_dark_red
+            cell_title.font = font_white_bold
             cell_title.alignment = align_center
             cell_title.border = thin_border
             
-            # Aplica a borda no restante das células mescladas para o layout não quebrar
+            # Aplica a cor e borda no restante das células mescladas para o layout não quebrar
             for c in range(1, max_col + 1):
-                ws.cell(row=1, column=c).border = thin_border
+                cell_merged = ws.cell(row=1, column=c)
+                cell_merged.border = thin_border
+                cell_merged.fill = fill_dark_red
             
-            # 2. CABEÇALHO VERMELHO
+            # 2. CABEÇALHO VERMELHO DAS COLUNAS
             for col_num, col_name in enumerate(colunas, 1):
                 cell = ws.cell(row=2, column=col_num, value=col_name)
-                cell.fill = fill_header
+                cell.fill = fill_dark_red
                 cell.font = font_header
                 cell.alignment = align_center
                 cell.border = thin_border
                 
-            # 3. INSERINDO DADOS E SEPARADORES POR TIPO
+            # 3. INSERINDO DADOS COM ZEBRADO E SEPARADORES VERMELHOS
             row_idx = 3
             tipos = df_exp['Tipo'].unique()
+            linha_zebra = 0  # Contador global para aplicar o zebrado nas linhas de produtos
             
             for tipo in tipos:
                 # Linha separadora do Tipo (ex: "Pedidos bovinos")
                 ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=max_col)
                 cell_sep = ws.cell(row=row_idx, column=1, value=f"Pedidos {tipo.lower()}")
-                cell_sep.fill = fill_sep
-                cell_sep.font = font_sep
+                cell_sep.fill = fill_dark_red
+                cell_sep.font = font_white_bold
                 cell_sep.alignment = align_center
                 
-                # Bordas na linha do separador
+                # Cores e bordas na linha do separador
                 for c in range(1, max_col + 1):
-                    ws.cell(row=row_idx, column=c).border = thin_border
+                    cell_merged_sep = ws.cell(row=row_idx, column=c)
+                    cell_merged_sep.border = thin_border
+                    cell_merged_sep.fill = fill_dark_red
                     
                 row_idx += 1
                 
                 # Inserindo os itens que pertencem a esse tipo
                 df_tipo = df_exp[df_exp['Tipo'] == tipo]
                 for _, row_data in df_tipo.iterrows():
+                    linha_zebra += 1
                     for col_num, col_name in enumerate(colunas, 1):
                         val = row_data[col_name]
                         cell = ws.cell(row=row_idx, column=col_num, value=val)
-                        cell.border = thin_border # Garante as linhas em todas as células
+                        cell.border = thin_border 
+                        
+                        # Aplica o vermelho claro (zebra) em linhas pares
+                        if linha_zebra % 2 == 0:
+                            cell.fill = fill_light_red
                         
                         if col_name in ['Tipo', 'Descrição']:
                             cell.alignment = align_left
