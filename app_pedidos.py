@@ -626,7 +626,13 @@ if perfil_navegacao == "Separação e Fechamento":
                     for col_num in range(1, max_col + 1):
                         col_name = colunas[col_num - 1]
                         val = row_data[col_name]
-                        cell = ws.cell(row=row_idx, column=col_num, value=val)
+                        # --- AJUSTE AQUI ---
+                        # Se for coluna de quantidade (Lojas) e o valor for 0, escreve vazio
+                        if col_name in LOJAS and (val == 0 or val == 0.0):
+                            cell = ws.cell(row=row_idx, column=col_num, value="")
+                        else:
+                            cell = ws.cell(row=row_idx, column=col_num, value=val)
+                        #cell = ws.cell(row=row_idx, column=col_num, value=val)
                         cell.border = thin_border 
                         
                         # Aplica o vermelho claro (zebra) em linhas ímpares
